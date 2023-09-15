@@ -1,0 +1,28 @@
+{
+    "source_motion": "D:/project/pytorch/MotionGeneration/AMP/SAMP_dataset/smplx/armchair.npy",
+    "target_motion_path": "D:/project/pytorch/MotionGeneration/AMP/SAMP_dataset/npy/armchair.npy",
+    "source_tpose": "data/smplx_tpose.npy",
+    "target_tpose": "data/amp_humanoid_tpose.npy",
+    "joint_mapping": {
+         "pelvis": "pelvis",
+         "left_hip": "left_thigh",
+         "left_knee": "left_shin",
+         "left_ankle": "left_foot",
+         "right_hip": "right_thigh",
+         "right_knee": "right_shin",
+         "right_ankle": "right_foot",
+         "spine1": "torso",
+         "head": "head",
+         "left_shoulder": "left_upper_arm",
+         "left_elbow": "left_lower_arm",
+         "left_wrist": "left_hand",
+         "right_shoulder": "right_upper_arm",
+         "right_elbow": "right_lower_arm",
+         "right_wrist": "right_hand"
+    },
+    "rotation": [0.5, 0.5, 0.5, 0.5],
+    "scale": 1.007953,
+	"root_height_offset": 0.05,
+	"trim_frame_beg": 100,
+	"trim_frame_end": -1
+}

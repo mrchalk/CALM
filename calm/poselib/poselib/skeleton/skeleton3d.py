@@ -35,7 +35,7 @@ import numpy as np
 import torch
 
 from ..core import *
-from .backend.fbx.fbx_read_wrapper import fbx_to_array
+from .backend.fbx.fbx_read_wrapper import fbx_to_array, bvh_to_array
 import scipy.ndimage.filters as filters
 
 
@@ -1229,6 +1229,41 @@ class SkeletonMotion(SkeletonState):
                 np.swapaxes(np.array(transforms), -1, -2),
             ).float()
         )
+        local_rotation = transform_rotation(local_transform)
+        root_translation = transform_translation(local_transform)[..., root_trans_index, :]
+        joint_parents = torch.from_numpy(np.array(joint_parents)).int()
+
+        if skeleton_tree is None:
+            local_translation = transform_translation(local_transform).reshape(
+                -1, len(joint_parents), 3
+            )[0]
+            skeleton_tree = SkeletonTree(joint_names, joint_parents, local_translation)
+        skeleton_state = SkeletonState.from_rotation_and_root_translation(
+            skeleton_tree, r=local_rotation, t=root_translation, is_local=True
+        )
+        if not is_local:
+            skeleton_state = skeleton_state.global_repr()
+        return cls.from_skeleton_state(
+            skeleton_state=skeleton_state, fps=fps
+        )
+    
+    @classmethod
+    def from_bvh(
+        cls: Type["SkeletonMotion"],
+        bvh_file_path,
+        skeleton_tree=None,
+        is_local=True,
+        fps=120,
+        root_joint="",
+        root_trans_index=0,
+        *args,
+        **kwargs,
+    ) -> "SkeletonMotion":
+        joint_names, joint_parents, transforms, fps = bvh_to_array(
+            bvh_file_path, root_joint, fps
+        )
+        # swap the last two axis to match the convention
+        local_transform = torch.from_numpy(transforms).float()[..., [1, 2, 3, 0, 4, 5, 6]]
         local_rotation = transform_rotation(local_transform)
         root_translation = transform_translation(local_transform)[..., root_trans_index, :]
         joint_parents = torch.from_numpy(np.array(joint_parents)).int()

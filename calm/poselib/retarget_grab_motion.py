@@ -2,6 +2,7 @@ import os
 import os.path as osp
 import torch
 import json
+import shutil
 
 from poselib.core.rotation3d import *
 from poselib.skeleton.skeleton3d import SkeletonState, SkeletonMotion
@@ -23,23 +24,9 @@ def main():
     
     fbx_dir = "D:/project/pytorch/MotionGeneration/GRAB/grab_fbx/"
     target_motion_dir = "D:/project/pytorch/MotionGeneration/GRAB/grab_npy/"
+    lift_motion_dir = "D:/project/pytorch/MotionGeneration/GRAB/grab_lift/"
 
     for subject_index in range(1, 11):
-
-        # make subject tpose
-        source_tpose = SkeletonState.from_file('data/cmu_tpose.npy')
-        source_tpose_motion = SkeletonMotion.from_fbx(
-            fbx_file_path=osp.join(fbx_dir, f"s{subject_index}_tpose.fbx"),
-            root_joint="pelvis",
-            fps=24
-        )
-        source_tpose._skeleton_tree = source_tpose_motion.skeleton_tree
-        root_translation = source_tpose_motion.root_translation[0]
-        source_tpose._root_translation = root_translation
-        source_tpose._rotation = torch.zeros_like(source_tpose_motion.rotation[0])
-        source_tpose._rotation[:, -1] = 1.0
-
-        # plot_skeleton_state(source_tpose)
 
         fbx_files = os.listdir(osp.join(fbx_dir, f"s{subject_index}"))
         fbx_files = [file for file in fbx_files if file.endswith(".fbx") or file.endswith(".FBX")]
@@ -47,11 +34,24 @@ def main():
 
         for fbx_file in fbx_files:
 
-            output_path = osp.join(target_motion_dir, f"s{subject_index}_" + fbx_file[:-4] + ".npy")
+            output_path = osp.join(target_motion_dir, f"s{subject_index}_{fbx_file[:-4]}.npy")
             if osp.isfile(output_path):
                 continue
 
-            print(f"s{subject_index}_" + fbx_file[:-4])
+            print(f"s{subject_index}_{fbx_file[:-4]}")
+
+            # make subject tpose
+            source_tpose = SkeletonState.from_file('data/cmu_tpose.npy')
+            source_tpose_motion = SkeletonMotion.from_fbx(
+                fbx_file_path=osp.join(fbx_dir, f"s{subject_index}_tpose.fbx"),
+                root_joint="pelvis",
+                fps=24
+            )
+            source_tpose._skeleton_tree = source_tpose_motion.skeleton_tree
+            root_translation = source_tpose_motion.root_translation[0]
+            source_tpose._root_translation = root_translation
+            source_tpose._rotation = torch.zeros_like(source_tpose_motion.rotation[0])
+            source_tpose._rotation[:, -1] = 1.0
 
             source_motion = SkeletonMotion.from_fbx(
                 fbx_file_path=osp.join(fbx_dir, f"s{subject_index}", fbx_file),
@@ -110,6 +110,9 @@ def main():
 
             # save retargeted motion
             target_motion.to_file(output_path)
+
+            if "lift" in fbx_file[:-4]:
+                shutil.copy(output_path, osp.join(lift_motion_dir, f"s{subject_index}_{fbx_file[:-4]}.npy"))
 
         #     break
         # break

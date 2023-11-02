@@ -23,8 +23,54 @@ def main():
     rotation_to_target_skeleton = torch.tensor(retarget_data["rotation"])
     
     fbx_dir = "D:/project/pytorch/MotionGeneration/GRAB/grab_fbx/"
-    target_motion_dir = "D:/project/pytorch/MotionGeneration/GRAB/grab_npy/"
-    lift_motion_dir = "D:/project/pytorch/MotionGeneration/GRAB/grab_lift/"
+    target_motion_dir = "D:/project/pytorch/MotionGeneration/GRAB/grab_lift_20/"
+    # lift_motion_dir = "D:/project/pytorch/MotionGeneration/GRAB/grab_lift/"
+
+    frame_begs = {
+        "s1_airplane_lift": 67,
+        "s1_alarmclock_lift": 62,
+        "s2_apple_lift": 85,
+        "s2_camera_lift": 94,
+        "s3_binoculars_lift": 98,
+        "s3_cubelarge_lift": 148,
+        "s4_cubelarge_lift": 104,
+        "s4_cubemedium_lift": 89,
+        "s5_cubesmall_lift": 133,
+        "s5_cup_lift": 128,
+        "s6_bowl_lift": 111,
+        "s6_cylinderlarge_lift": 119,
+        "s7_headphones_lift": 99,
+        "s7_eyeglasses_lift": 58,
+        "s8_cylindermedium_lift": 85,
+        "s8_cylindersmall_lift": 128,
+        "s9_duck_lift": 92,
+        "s9_elephant_lift": 108,
+        "s10_gamecontroller_lift": 104,
+        "s10_hammer_lift": 110,
+    }
+
+    frame_ends = {
+        "s1_airplane_lift": 376,
+        "s1_alarmclock_lift": 290,
+        "s2_apple_lift": 324,
+        "s2_camera_lift": 420,
+        "s3_binoculars_lift": 297,
+        "s3_cubelarge_lift": 371,
+        "s4_cubelarge_lift": 311,
+        "s4_cubemedium_lift": 313,
+        "s5_cubesmall_lift": 388,
+        "s5_cup_lift": 353,
+        "s6_bowl_lift": 324,
+        "s6_cylinderlarge_lift": 385,
+        "s7_headphones_lift": 330,
+        "s7_eyeglasses_lift": 297,
+        "s8_cylindermedium_lift": 340,
+        "s8_cylindersmall_lift": 350,
+        "s9_duck_lift": 277,
+        "s9_elephant_lift": 277,
+        "s10_gamecontroller_lift": 306,
+        "s10_hammer_lift": 338,
+    }
 
     for subject_index in range(1, 11):
 
@@ -35,7 +81,7 @@ def main():
         for fbx_file in fbx_files:
 
             output_path = osp.join(target_motion_dir, f"s{subject_index}_{fbx_file[:-4]}.npy")
-            if osp.isfile(output_path):
+            if osp.isfile(output_path) or f"s{subject_index}_{fbx_file[:-4]}" not in frame_begs.keys():
                 continue
 
             print(f"s{subject_index}_{fbx_file[:-4]}")
@@ -68,18 +114,21 @@ def main():
                 scale_to_target_skeleton= 1.0 / root_translation[1]
             )
 
-            # keep frames between [trim_frame_beg, trim_frame_end]
-            frame_beg = 15
-            frame_end = -15
+            # # keep frames between [trim_frame_beg, trim_frame_end]
+            # frame_beg = 15
+            # frame_end = -15
 
-            # motion is at least 1s long
-            if frame_end >= 0:
-                frame_end = target_motion.local_rotation.shape[0]
-                if frame_end - frame_beg < 30:
-                    continue
-            else:
-                if target_motion.local_rotation.shape[0] - (frame_beg - frame_end) < 30:
-                    continue
+            # # motion is at least 1s long
+            # if frame_end >= 0:
+            #     frame_end = target_motion.local_rotation.shape[0]
+            #     if frame_end - frame_beg < 30:
+            #         continue
+            # else:
+            #     if target_motion.local_rotation.shape[0] - (frame_beg - frame_end) < 30:
+            #         continue
+
+            frame_beg = round(frame_begs[f"s{subject_index}_{fbx_file[:-4]}"] * 0.25)
+            frame_end = round(frame_ends[f"s{subject_index}_{fbx_file[:-4]}"] * 0.25)
             
             local_rotation = target_motion.local_rotation
             root_translation = target_motion.root_translation
@@ -111,8 +160,8 @@ def main():
             # save retargeted motion
             target_motion.to_file(output_path)
 
-            if "lift" in fbx_file[:-4]:
-                shutil.copy(output_path, osp.join(lift_motion_dir, f"s{subject_index}_{fbx_file[:-4]}.npy"))
+            # if "lift" in fbx_file[:-4]:
+            #     shutil.copy(output_path, osp.join(lift_motion_dir, f"s{subject_index}_{fbx_file[:-4]}.npy"))
 
         #     break
         # break

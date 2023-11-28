@@ -23,7 +23,7 @@ def main():
     joint_mapping = retarget_data["joint_mapping"]
     rotation_to_target_skeleton = torch.tensor(retarget_data["rotation"])
     
-    fbx_dir = "D:/project/pytorch/MotionGeneration/SAMP/armchair/"
+    fbx_dir = "D:/project/pytorch/MotionGeneration/SAMP/lie_down_13/"
     fbx_files = os.listdir(fbx_dir)
     fbx_files = [file for file in fbx_files if file.endswith(".fbx") or file.endswith(".FBX")]
     fbx_files.sort()
@@ -55,22 +55,45 @@ def main():
     #               ]
     
     # arm chair
-    frame_begs = [230, 285, 186, 291, 272, 272, # 0-5
-                  184, 277, 152, 152, 141, # 6-10
-                  193, 223, 284, 315, 320, # 11-15
-                  358, 400, 252, 215, # 16-19
+    # frame_begs = [230, 285, 186, 291, 272, 272, # 0-5
+    #               184, 277, 152, 152, 141, # 6-10
+    #               193, 223, 284, 315, 320, # 11-15
+    #               358, 400, 252, 215, # 16-19
+    #               ]
+    # frame_ends = [400, 456, 338, 480, 505, 460,
+    #               430, 450, 300, 289, 308,
+    #               368, 425, 413, 488, 490,
+    #               535, 600, 394, 368,
+    #               ]
+
+    # standup then walk for two steps, from chair_mo
+    # frame_begs = [674, 574, 522, 614, 591, 744, # 0-5
+    #               1049, 649, 625, 644, 691, # 6-10
+    #               785, 543, 782, 671, 604, # 11-15
+    #               645, 551, 706, 513 # 16-19
+    #               ]
+    # frame_ends = [800, 697, 707, 753, 726, 910,
+    #               1143, 840, 794, 760, 875,
+    #               970, 701, 876, 774, 728,
+    #               837, 709, 825, 635
+    #               ]
+
+    # getup then walk for two steps, from lie_down
+    frame_begs = [688, 575, 684, 807, 575, # 1-5
+                  460, 622, 462, 663, 571, # 6-10
+                  618, 492, 611, # 11-13
                   ]
-    frame_ends = [400, 456, 338, 480, 505, 460,
-                  430, 450, 300, 289, 308,
-                  368, 425, 413, 488, 490,
-                  535, 600, 394, 368,
+    frame_ends = [872, 787, 873, 982, 794,
+                  606, 804, 664, 829, 753,
+                  779, 663, 777,
                   ]
+    lie_down_index = [2, 3, 7, 8, 12, 21, 25, 27, 28, 29, 32, 33, 34]
 
     # rescale from 24fps to 60 fps
     frame_begs = [frame_num * 2.5 for frame_num in frame_begs]
     frame_ends = [frame_num * 2.5 for frame_num in frame_ends]
 
-    target_motion_dir = "D:/project/pytorch/MotionGeneration/SAMP/npy/armchair/"
+    target_motion_dir = "D:/project/pytorch/MotionGeneration/SAMP/npy/getup/"
     
     for index, fbx_file in enumerate(fbx_files):
         output_path = osp.join(target_motion_dir, fbx_file[:-4] + ".npy")
@@ -95,11 +118,12 @@ def main():
         )
 
         # lie down
-        # index = fbx_file[:-4].split("_")[-1]
-        # if index == "down":
-        #     index = 0
-        # else:
-        #     index = int(index) - 1
+        index = fbx_file[:-4].split("_")[-1]
+        if index == "down":
+            index = 0
+        else:
+            index = int(index) - 1
+        index = lie_down_index.index(index + 1)
         
         # keep frames between [trim_frame_beg, trim_frame_end]
         frame_beg = round(frame_begs[index] * 0.5)

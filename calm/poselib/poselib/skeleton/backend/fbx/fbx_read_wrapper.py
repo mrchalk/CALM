@@ -39,7 +39,7 @@ def fbx_to_array(fbx_file_path, root_joint, fps):
     joint_names, parents, local_transforms, fbx_fps = parse_fbx(fbx_file_path, root_joint, fps)
     return joint_names, parents, local_transforms, fbx_fps
 
-def bvh_to_array(bvh_file_path, root_joint, fps):
+def bvh_to_array(bvh_file_path, root_joint, fps, strip_root):
     """
     Reads an fbx file to an array.
 
@@ -52,5 +52,5 @@ def bvh_to_array(bvh_file_path, root_joint, fps):
     assert os.path.exists(bvh_file_path)
 
     # Parse FBX file
-    joint_names, parents, local_transforms, fbx_fps = parse_bvh(bvh_file_path, root_joint, fps)
+    joint_names, parents, local_transforms, fbx_fps = parse_bvh(bvh_file_path, root_joint, fps, strip_root)
     return joint_names, parents, local_transforms, fbx_fps

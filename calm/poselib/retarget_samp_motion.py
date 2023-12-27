@@ -110,11 +110,11 @@ def main():
 
         # run retargeting
         target_motion = source_motion.retarget_to_by_tpose(
-        joint_mapping=joint_mapping,
-        source_tpose=source_tpose,
-        target_tpose=target_tpose,
-        rotation_to_target_skeleton=rotation_to_target_skeleton,
-        scale_to_target_skeleton=retarget_data["scale"]
+            joint_mapping=joint_mapping,
+            source_tpose=source_tpose,
+            target_tpose=target_tpose,
+            rotation_to_target_skeleton=rotation_to_target_skeleton,
+            scale_to_target_skeleton=retarget_data["scale"]
         )
 
         # lie down

@@ -52,7 +52,7 @@ def mul(x, y):
         y0 * x3 - y1 * x2 + y2 * x1 + y3 * x0], axis=-1)
 
 
-def bvh_to_npy(file_name_in, root_joint_name, fps, order=None):
+def bvh_to_npy(file_name_in, root_joint_name, fps, strip_root, order=None):
     f = open(file_name_in, "r")
 
     i = 0
@@ -165,8 +165,16 @@ def bvh_to_npy(file_name_in, root_joint_name, fps, order=None):
         )
     local_transforms = local_transforms[::skip_frame]
 
+    if strip_root:
+        names = names[1:]
+        parents = [index - 1 for index in parents[1:]]
+        local_transforms = local_transforms[:, 1:, :]
+    
+    if local_transforms.shape[0] == 1:
+        local_transforms = np.concatenate((local_transforms, local_transforms), axis=0)
+
     return names, parents, local_transforms, fps
 
 
-def parse_bvh(file_name_in, root_joint_name, fps):
-    return bvh_to_npy(file_name_in, root_joint_name, fps)
+def parse_bvh(file_name_in, root_joint_name, fps, strip_root):
+    return bvh_to_npy(file_name_in, root_joint_name, fps, strip_root)

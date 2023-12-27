@@ -1254,13 +1254,14 @@ class SkeletonMotion(SkeletonState):
         skeleton_tree=None,
         is_local=True,
         fps=120,
+        strip_root=False,
         root_joint="",
         root_trans_index=0,
         *args,
         **kwargs,
     ) -> "SkeletonMotion":
         joint_names, joint_parents, transforms, fps = bvh_to_array(
-            bvh_file_path, root_joint, fps
+            bvh_file_path, root_joint, fps, strip_root
         )
         # swap the last two axis to match the convention
         local_transform = torch.from_numpy(transforms).float()[..., [1, 2, 3, 0, 4, 5, 6]]
